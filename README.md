@@ -8,7 +8,7 @@ Method 1)
 
 ######  Wget the install script:
 
-`wget https://raw.githubusercontent.com/vitor-kato/my-zsh/master/script.sh `
+`sh -c "$(wget https://raw.githubusercontent.com/vitor-kato/my-zsh/master/script.sh -O -)"`
 
 Method 2)
 ###### Download the repo
