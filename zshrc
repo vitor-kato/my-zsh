@@ -267,11 +267,20 @@ alias vgs='vagrant global-status'
 alias vport='vagrant port'
 alias vdebian='vagrant init debian/stretch64'
 alias vcentos='vagrant init centos/7'
-alias vubuntu='vagrant ubuntu/xenial64'
+alias vubuntu='vagrant init ubuntu/xenial64'
 # Docker alias
 alias dps='docker ps'
+alias dim='docker images'
 alias dpull='docker pull'
 alias dexec='docker exec -it'
+# Kubernetes alias
+alias kctl='kubectl'
+alias kget='kubectl get'
+alias kapply='kubectl apply -f'
+alias kcreate='kubectl create -f'
+alias klogs='kubectl logs'
+
+if [ /usr/bin/kubectl ]; then source <(kubectl completion zsh); fi
 
 #-------------------------------------------------------------
 # The 'ls' family (this assumes you use a recent GNU ls).
@@ -505,6 +514,13 @@ function ii()   # Get current host related info.
 #-------------------------------------------------------------
 # Misc utilities:
 #-------------------------------------------------------------
+function exports() {
+    while read LINE
+    do
+        echo "%s\n" "$line"
+    done < "$1"
+}
+
 
 function repeat()       # Repeat n times command.
 {
@@ -789,13 +805,3 @@ _make()
                         echo -ne "${Purple}" "Today is "; date
                         echo -e "${Green}"; cal -3;
                         echo -ne "${Cyan}";
-
-                        alias exa="exa -bghHliS"
-
-                        # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-                        source ~/.rvm/scripts/rvm
-                        export PATH="$PATH:$HOME/.rvm/bin"
-
-
-source ~/.xsh
-
