@@ -56,7 +56,7 @@ HIST_STAMPS="dd.mm.yyyy"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-syntax-highlighting z)
+plugins=(git zsh-syntax-highlighting z sudo per-directory-history)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -273,12 +273,25 @@ alias dps='docker ps'
 alias dim='docker images'
 alias dpull='docker pull'
 alias dexec='docker exec -it'
+alias drmid='docker rmi $(docker images -f 'dangling=true' -q)' # Removes all <none> images
+alias dcom='docker-compose'
 # Kubernetes alias
 alias kctl='kubectl'
 alias kget='kubectl get'
 alias kapply='kubectl apply -f'
 alias kcreate='kubectl create -f'
 alias klogs='kubectl logs'
+alias k=kubectl
+alias pods='kubectl get pods'
+complete -F __start_kubectl k
+
+function ke() { kubectl exec -it $1 bash }
+
+# Text Editors
+
+alias c='code .'
+alias a='atom .'
+
 
 if [ /usr/bin/kubectl ]; then source <(kubectl completion zsh); fi
 
@@ -339,19 +352,10 @@ alias kk='ll'
 # Make the following commands run in background automatically:
 #-------------------------------------------------------------
 
-function te()  # wrapper around xemacs/gnuserv
-{
-    if [ "$(gnuclient -batch -eval t 2>&-)" == "t" ]; then
-        gnuclient -q "$@";
-    else
-        ( xemacs "$@" &);
-    fi
-}
-
-function soffice() { command soffice "$@" & }
 function firefox() { command firefox "$@" & }
-function xpdf() { command xpdf "$@" & }
 function nautilus() { command nautilus "$@"> /dev/null  & }
+
+
 
 #-------------------------------------------------------------
 # File & strings related functions:
@@ -717,7 +721,7 @@ _make()
 
                         alias o='xdg-open '
 
-                        alias upgrade="sudo apt-get update && sudo apt-get upgrade -y --force-yes && sudo apt-get dist-upgrade -y --force-yes"
+                        alias upgrade="sudo apt update && sudo apt upgrade -y --force-yes && sudo apt dist-upgrade -y --force-yes"
 
                         alias gco="git checkout "
                         alias gba="git branch -a"
@@ -805,3 +809,5 @@ _make()
                         echo -ne "${Purple}" "Today is "; date
                         echo -e "${Green}"; cal -3;
                         echo -ne "${Cyan}";
+
+                        source ~/.profile
