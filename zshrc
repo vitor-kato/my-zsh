@@ -1,3 +1,5 @@
+if [ -n "$ZSH_VERSION" ]; then
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -67,13 +69,6 @@ source $ZSH/oh-my-zsh.sh
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-    export EDITOR='nano'
-else
-    export EDITOR='nano'
-fi
-
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
@@ -88,6 +83,16 @@ fi
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+fi
+
+
+if [[ -n $SSH_CONNECTION ]]; then
+    export EDITOR='nano'
+else
+    export EDITOR='nano'
+fi
+
+
 alias -s log="less -MN"
 alias -s html="chromium"
 
@@ -239,22 +244,19 @@ function job_color()
 #-------------------
 # Personnal Aliases
 #-------------------
-alias weather='curl wttr.in/sao+paulo'
+alias weather='curl "wttr.in/sao+paulo?m"'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 # -> Prevents accidentally clobbering files.
 alias mkdir='mkdir -p'
-
 alias h='history'
 alias j='jobs -l'
 alias which='type -a'
 alias ..='cd ..'
-
 # Pretty-print of some PATH variables:
 alias path='echo -e ${PATH//:/\\n}'
 alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
-
 alias du='du -kh'    # Makes a more readable output.
 alias df='df -kTh'
 # Vagrant alias
@@ -284,13 +286,34 @@ alias klogs='kubectl logs'
 alias k=kubectl
 alias pods='kubectl get pods'
 complete -F __start_kubectl k
-
 function ke() { kubectl exec -it $1 bash }
-
+#Github alias
+alias gpr='git pull --rebase '
+alias gad='git add '
+alias gaa='git add -A'
+alias gam='git add -u'
+alias gst='git status'
+alias gstu='git status -uno'
+alias gdf='git diff -w '
+alias gcl='git clone '
+alias gcp='git cherry-pick '
+alias gfa='git fetch --all '
+alias gco='git checkout '
+alias gba='git branch -a'
+alias gcm='git commit -m '
+alias gme='git mergetool '
+alias gbr='git branch '
 # Text Editors
-
 alias c='code .'
 alias a='atom .'
+
+
+alias search="grep -R "
+alias g="grep"
+alias and="grep"
+alias not="grep -v"
+alias o='xdg-open '
+alias upgrade="sudo apt update && sudo apt upgrade -y --force-yes && sudo apt dist-upgrade -y --force-yes"
 
 
 if [ /usr/bin/kubectl ]; then source <(kubectl completion zsh); fi
@@ -354,7 +377,6 @@ alias kk='ll'
 
 function firefox() { command firefox "$@" & }
 function nautilus() { command nautilus "$@"> /dev/null  & }
-
 
 
 #-------------------------------------------------------------
@@ -495,7 +517,7 @@ function mydf()         # Pretty-print of 'df' output.
 
 function my_ip() # Get IP adress on ethernet.
 {
-    MY_IP=$(/bin/ip eth0 | awk '/inet/ { print $2 } ' |
+    MY_IP=$(/bin/ip a | awk '/inet/ { print $2 } ' |
       sed -e s/addr://)
     echo ${MY_IP:-"Not connected"}
 }
@@ -535,279 +557,81 @@ function repeat()       # Repeat n times command.
     done
 }
 
-
-function ask()          # See 'killps' for example of use.
-{
-    echo -n "$@" '[y/n] ' ; read ans
-    case "$ans" in
-        y*|Y*) return 0 ;;
-        *) return 1 ;;
-    esac
+function s() {
+    ssh-copy-id $1
+    scp /etc/bash.bashrc $1:/tmp/.bashrc_temp
+    ssh -t $1 $2 $3 "bash --rcfile /tmp/.bashrc_temp"
 }
 
-function corename()   # Get name of app that created a corefile.
-{
-    for file ; do
-        echo -n $file : ; gdb --core=$file --batch | head -1
-    done
+function gbrkeep(){
+    git branch | grep -v "$1" | xargs git branch -D
+}
+function gps() {
+    git config --global credential.helper cache
+    git config --global credential.helper 'cache --timeout=604800'
+    git push $1 $2 $3 $4 $5 $6
+}
+function gpu(){
+    git config --global credential.helper cache
+    git config --global credential.helper 'cache --timeout=604800'
+    git pull $1 $2 $3 $4 $5 $6
 }
 
-_tar()
-{
-    local cur ext regex tar untar
 
-    COMPREPLY=()
-    cur=${COMP_WORDS[COMP_CWORD]}
-
-    # If we want an option, return the possible long options.
-    case "$cur" in
-        -*)     COMPREPLY=( $(_get_longopts $1 $cur ) ); return 0;;
-    esac
-
-    if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=( $( compgen -W 'c t x u r d A' -- $cur ) )
-        return 0
-    fi
-
-    case "${COMP_WORDS[1]}" in
-        ?(-)c*f)
-            COMPREPLY=( $( compgen -f $cur ) )
-            return 0
-            ;;
-        +([^Izjy])f)
-            ext='tar'
-            regex=$ext
-            ;;
-        *z*f)
-            ext='tar.gz'
-            regex='t\(ar\.\)\(gz\|Z\)'
-            ;;
-        *[Ijy]*f)
-            ext='t?(ar.)bz?(2)'
-            regex='t\(ar\.\)bz2\?'
-            ;;
-        *)
-            COMPREPLY=( $( compgen -f $cur ) )
-            return 0
-            ;;
-
-    esac
-
-    if [[ "$COMP_LINE" == tar*.$ext' '* ]]; then
-        # Complete on files in tar file.
-        #
-        # Get name of tar file from command line.
-        tar=$( echo "$COMP_LINE" | \
-                        sed -e 's|^.* \([^ ]*'$regex'\) .*$|\1|' )
-        # Devise how to untar and list it.
-        untar=t${COMP_WORDS[1]//[^Izjyf]/}
-
-        COMPREPLY=( $( compgen -W "$( echo $( tar $untar $tar \
-        2>/dev/null ) )" -- "$cur" ) )
-        return 0
-
-    else
-        # File completion on relevant files.
-        COMPREPLY=( $( compgen -G $cur\*.$ext ) )
-
-    fi
-
-    return 0
-
+function gadnw(){
+    git diff -U0 -w --no-color --no-ext-diff "$@" $1 $2 $3 $4 $5 | git apply --cached --ignore-whitespace --unidiff-zero -
 }
 
-_make()
-{
-    local mdef makef makef_dir="." makef_inc gcmd cur prev i;
-    COMPREPLY=();
-    cur=${COMP_WORDS[COMP_CWORD]};
-    prev=${COMP_WORDS[COMP_CWORD-1]};
-    case "$prev" in
-        -*f)
-            COMPREPLY=($(compgen -f $cur ));
-            return 0
-        ;;
-    esac;
-    case "$cur" in
-        -*)
-            COMPREPLY=($(_get_longopts $1 $cur ));
-            return 0
-        ;;
-    esac;
 
-    # ... make reads
-    #          GNUmakefile,
-    #     then makefile
-    #     then Makefile ...
-    if [ -f ${makef_dir}/GNUmakefile ]; then
-        makef=${makef_dir}/GNUmakefile
-    elif [ -f ${makef_dir}/makefile ]; then
-        makef=${makef_dir}/makefile
-    elif [ -f ${makef_dir}/Makefile ]; then
-        makef=${makef_dir}/Makefile
-    else
-        makef=${makef_dir}/*.mk         # Local convention.
-    fi
+function gh_r() {
+    git clone https://github.com/$1 $2
+}
 
 
-    #  Before we scan for targets, see if a Makefile name was
-    #+ specified with -f.
-    for (( i=0; i < ${#COMP_WORDS[@]}; i++ )); do
-        if [[ ${COMP_WORDS[i]} == -f ]]; then
-            # eval for tilde expansion
-            eval makef=${COMP_WORDS[i+1]}
-            break
-        fi
-    done
-    [ ! -f $makef ] && return 0
-
-    # Deal with included Makefiles.
-    makef_inc=$( grep -E '^-?include' $makef |
-        sed -e "s,^.* ,"$makef_dir"/," )
-            for file in $makef_inc; do
-                [ -f $file ] && makef="$makef $file"
-            done
+function ssu(){
+    su $1 $2 $3 $4 $5-c "bash --rcfile /tmp/.bashrc_temp"
+}
 
 
-            #  If we have a partial word to complete, restrict completions
-            #+ to matches of that word.
-            if [ -n "$cur" ]; then gcmd='grep "^$cur"' ; else gcmd=cat ; fi
+# WELCOME SCREEN
+################################################## #####
 
-            COMPREPLY=( $( awk -F':' '/^[a-zA-Z0-9][^$#\/\t=]*:([^=]|$)/ \
-                    {split($1,A,/ /);for(i in A)print A[i]}' \
-                    $makef 2>/dev/null | eval $gcmd  ))
+clear
 
-                }
+weekday=$(date "+%-u")
+msg=""
+if [ $weekday -eq 1 ]
+then
+    msg="Hardcore day to work. I bet."
+fi
+if [ $weekday -eq 2 ]
+then
+    msg=""
+fi
+if [ $weekday -eq 3 ]
+then
+    msg="Finish your job and go drink beer to celebrate the midweek."
+fi
+if [ $weekday -eq 4 ]
+then
+    msg=""
+fi
+if [ $weekday -eq 5 ]
+then
+    msg="Today is the badness day. Go to run update/delete without where! Install Windows on a Mac Computer.."
+fi
+if [ $weekday -eq 6 ]
+then
+    msg="Are you working today brah?"
+fi
+if [ $weekday -eq 7 ]
+then
+    msg="You still working brah?"
+fi
 
-                _killall()
-                {
-                    local cur prev
-                    COMPREPLY=()
-                    cur=${COMP_WORDS[COMP_CWORD]}
+echo -ne "${White}" "Hello $USER, " $msg
+echo -ne "${Purple}" "Today is "; date
+echo -e "${Green}"; cal -3;
+echo -ne "${Cyan}";
 
-                    #  Get a list of processes
-                    #+ (the first sed evaluation
-                    #+ takes care of swapped out processes, the second
-                    #+ takes care of getting the basename of the process).
-                    COMPREPLY=( $( ps -u $USER -o comm  | \
-                            sed -e '1,1d' -e 's#[]\[]##g' -e 's#^.*/##'| \
-                            awk '{if ($0 ~ /^'$cur'/) print $0}' ))
-
-                            return 0
-                        }
-
-                        function install_rsub() {
-                            sudo wget -O /usr/local/bin/rsub \
-                            https://raw.github.com/aurora/rmate/master/rmate
-                            chmod 755 /usr/local/bin/rsub
-                        }
-
-
-                        function s() {
-                            ssh-copy-id $1
-                            scp /etc/bash.bashrc $1:/tmp/.bashrc_temp
-                            ssh -t $1 $2 $3 "bash --rcfile /tmp/.bashrc_temp"
-                        }
-
-                        alias skate="kate >&/dev/null "
-                        alias skomp="kompare >&/dev/null "
-                        alias rmbackups="find -name '*~' -exec rm '{}' \;" #delete backup files
-                        alias sshc='ssh -c arcfour,blowfish-cbc -C '
-
-                        alias search="grep -R "
-                        alias g="grep"
-                        alias and="grep"
-                        alias not="grep -v"
-
-                        alias o='xdg-open '
-
-                        alias upgrade="sudo apt update && sudo apt upgrade -y --force-yes && sudo apt dist-upgrade -y --force-yes"
-
-                        alias gco="git checkout "
-                        alias gba="git branch -a"
-                        alias gcm="git commit -m "
-                        alias gme="git mergetool "
-                        alias gbr="git branch "
-                        function gbrkeep(){
-                            git branch | grep -v "$1" | xargs git branch -D
-                        }
-                        # alias gps="git push"
-                        function gps() {
-                            git config --global credential.helper cache
-                            git config --global credential.helper 'cache --timeout=604800'
-                            git push $1 $2 $3 $4 $5 $6
-                        }
-                        function gpu(){
-                            git config --global credential.helper cache
-                            git config --global credential.helper 'cache --timeout=604800'
-                            git pull $1 $2 $3 $4 $5 $6
-                        }
-                        alias gpr="git pull --rebase "
-                        alias gad="git add "
-                        alias gaa="git add -A"
-                        alias gam="git add -u"
-                        alias gst="git status"
-                        alias gstu="git status -uno"
-                        alias gdf="git diff -w "
-                        alias gcl="git clone "
-                        alias gcp='git cherry-pick '
-                        alias gfa='git fetch --all '
-                        function gadnw(){
-                            git diff -U0 -w --no-color --no-ext-diff "$@" $1 $2 $3 $4 $5 | git apply --cached --ignore-whitespace --unidiff-zero -
-                        }
-
-
-                        function gh_r() {
-                            git clone https://github.com/$1 $2
-                        }
-
-
-                        function ssu(){
-                            su $1 $2 $3 $4 $5-c "bash --rcfile /tmp/.bashrc_temp"
-                        }
-
-                        alias testall="rake test"
-                        alias testpush="testall && git push"
-
-                        # WELCOME SCREEN
-                        ################################################## #####
-
-                        clear
-
-                        weekday=$(date "+%-u")
-                        msg=""
-                        if [ $weekday -eq 1 ]
-                        then
-                            msg="Hardcore day to work. I bet."
-                        fi
-                        if [ $weekday -eq 2 ]
-                        then
-                            msg=""
-                        fi
-                        if [ $weekday -eq 3 ]
-                        then
-                            msg="Finish your job and go drink beer to celebrate the midweek."
-                        fi
-                        if [ $weekday -eq 4 ]
-                        then
-                            msg=""
-                        fi
-                        if [ $weekday -eq 5 ]
-                        then
-                            msg="Today is the badness day. Go to run update/delete without where! Install Windows on a Mac Computer.."
-                        fi
-                        if [ $weekday -eq 6 ]
-                        then
-                            msg="Are you working today brah?"
-                        fi
-                        if [ $weekday -eq 7 ]
-                        then
-                            msg="You still working brah?"
-                        fi
-
-                        echo -ne "${White}" "Hello $USER, " $msg
-                        echo -ne "${Purple}" "Today is "; date
-                        echo -e "${Green}"; cal -3;
-                        echo -ne "${Cyan}";
-
-                        source ~/.profile
+source ~/.profile
