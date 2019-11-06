@@ -2,28 +2,46 @@
 
 You can read more about Oh-my-zsh [here]( https://github.com/robbyrussell/oh-my-zsh )
 
-### Basic Installation
+## Installation
 
-Method 1)
+### Automatic Installation
 
-######  Wget the install script:
+#### Wget the install script
 
-`sh -c "$(wget https://raw.githubusercontent.com/vitor-kato/my-zsh/master/script.sh -O -)"`
+```sh
+sh -c "$(wget https://raw.githubusercontent.com/vitor-kato/my-zsh/master/script.sh -O -)"
+```
 
-Method 2)
-###### Download the repo
-- `git clone https://github.com/vitor-kato/my-zsh.git && cd my-zsh`
+### Manual Installation
 
-###### [Install Zsh](https://github.com/robbyrussell/oh-my-zsh/wiki/Installing-ZSH)
-- On Unbutu/Debian OS
-`sudo apt-get install zsh`
+#### Download the repository
 
-###### Then download Oh-my-zsh
-- `sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" `
+```sh
+git clone https://github.com/vitor-kato/my-zsh.git && cd my-zsh
+```
 
-###### [This adds the syntax highlithing plugin]( https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md )  
-- `git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting`
+### Install Zsh
 
-###### Then make a symbolic link to the zshrc file
+ On Unbutu/Debian OS
 
-`ln -sf $(pwd)/zshrc ~/.zshrc`
+```sh
+sudo apt install zsh
+```
+
+### Download Oh-my-zsh
+
+```sh
+sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+```
+### Link zshrc file
+
+```sh
+ln -sf $(pwd)/zshrc ~/.zshrc
+```
+
+### Optional install [syntax highlithing plugin]( https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md )
+
+```sh
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```
+
