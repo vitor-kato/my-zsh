@@ -287,6 +287,7 @@ alias k=kubectl
 alias pods='kubectl get pods'
 complete -F __start_kubectl k
 function ke() { kubectl exec -it $1 bash }
+
 #Github alias
 alias gpr='git pull --rebase '
 alias gad='git add '
@@ -313,7 +314,7 @@ alias g="grep"
 alias and="grep"
 alias not="grep -v"
 alias o='xdg-open '
-alias upgrade="sudo apt update && sudo apt upgrade -y --force-yes && sudo apt dist-upgrade -y --force-yes"
+alias upgrade="sudo apt update && sudo apt upgrade -y"
 alias usb='watch -n 0.1 "dmesg | tail -n $((LINES-6))"'
 
 if [ /usr/bin/kubectl ]; then source <(kubectl completion zsh); fi
@@ -635,19 +636,4 @@ echo -e "${Green}"; cal -3;
 echo -ne "${Cyan}";
 
 source ~/.profile
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/vitorkato/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/vitorkato/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/vitorkato/anaconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/vitorkato/anaconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
 
