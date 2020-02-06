@@ -63,6 +63,7 @@ if [ -n "$ZSH_VERSION" ]; then
         z
         sudo
         per-directory-history
+        zsh-autosuggestions
         # pipenv
     )
 
