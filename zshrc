@@ -92,12 +92,6 @@ if [ -n "$ZSH_VERSION" ]; then
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 fi
 
-if [[ -n $SSH_CONNECTION ]]; then
-    export EDITOR='nano'
-else
-    export EDITOR='nano'
-fi
-
 function get_xserver() {
     case $TERM in
     xterm)
@@ -131,44 +125,43 @@ export DISPLAY
 # hence the 'Green' 'BRed' 'Red' sequence I often use in my prompt.
 
 # Normal Colors
-Black='\e[0;30m'                          # Black
-Red='\e[0;31m'                            # Red
-Green='\e[0;32m'                          # Green
-Yellow='\e[0;33m'                         # Yellow
-Blue='\e[0;34m'                           # Blue
-Purple='\e[0;35m'                         # Purple
-Cyan='\e[0;36m'                           # Cyan
-White='\e[0;37m'                          # White
+Black='\e[0;30m'  # Black
+Red='\e[0;31m'    # Red
+Green='\e[0;32m'  # Green
+Yellow='\e[0;33m' # Yellow
+Blue='\e[0;34m'   # Blue
+Purple='\e[0;35m' # Purple
+Cyan='\e[0;36m'   # Cyan
+White='\e[0;37m'  # White
 
 # Bold
-BBlack='\e[1;30m'                         # Black
-BRed='\e[1;31m'                           # Red
-BGreen='\e[1;32m'                         # Green
-BYellow='\e[1;33m'                        # Yellow
-BBlue='\e[1;34m'                          # Blue
-BPurple='\e[1;35m'                        # Purple
-BCyan='\e[1;36m'                          # Cyan
-BWhite='\e[1;37m'                         # White
+BBlack='\e[1;30m'  # Black
+BRed='\e[1;31m'    # Red
+BGreen='\e[1;32m'  # Green
+BYellow='\e[1;33m' # Yellow
+BBlue='\e[1;34m'   # Blue
+BPurple='\e[1;35m' # Purple
+BCyan='\e[1;36m'   # Cyan
+BWhite='\e[1;37m'  # White
 
 # Background
-On_Black='\e[40m'                         # Black
-On_Red='\e[41m'                           # Red
-On_Green='\e[42m'                         # Green
-On_Yellow='\e[43m'                        # Yellow
-On_Blue='\e[44m'                          # Blue
-On_Purple='\e[45m'                        # Purple
-On_Cyan='\e[46m'                          # Cyan
-On_White='\e[47m'                         # White
+On_Black='\e[40m'  # Black
+On_Red='\e[41m'    # Red
+On_Green='\e[42m'  # Green
+On_Yellow='\e[43m' # Yellow
+On_Blue='\e[44m'   # Blue
+On_Purple='\e[45m' # Purple
+On_Cyan='\e[46m'   # Cyan
+On_White='\e[47m'  # White
 
-NC="\e[m"                                 # Color Reset
+NC="\e[m" # Color Reset
 
-ALERT=${BWhite}${On_Red}                  # Bold White on red background
+ALERT=${BWhite}${On_Red} # Bold White on red background
 
 NCPU=$(grep -c 'processor' /proc/cpuinfo) # Number of CPUs
 SLOAD=$((100 * ${NCPU}))                  # Small load
 MLOAD=$((200 * ${NCPU}))                  # Medium load
 XLOAD=$((400 * ${NCPU}))                  # Xlarge load
-
 
 #============================================================
 #
@@ -215,14 +208,27 @@ alias dpull='docker pull'
 alias dexec='docker exec -it'
 alias drmid='docker rmi $(docker images -f 'dangling=true' -q)' # Removes all <none> images
 alias dcom='docker-compose'
+alias dup='docker-compose up'
+alias ddown='docker-compose down'
+function de() {
+    docker exec -it $1 ${2-bash} ${@:3}
+}
 # Kubernetes alias
 alias kctl='kubectl'
 alias kget='kubectl get'
 alias kapply='kubectl apply -f'
 alias kcreate='kubectl create -f'
-alias klogs='kubectl logs'
+# alias klogs='kubectl logs'
+function klogs() {
+    kubectl logs $(kubectl get pods | grep ${1} | awk '{print $1;exit}')
+}
+function ke() {
+    kubectl exec -it $1 ${2-bash} ${@:3}
+}
 alias k=kubectl
 alias pods='kubectl get pods'
+alias svc='kubectl get svc'
+alias kall='kubectl get deploy,pods,svc'
 
 #Github alias
 alias gpr='git pull --rebase '
@@ -241,7 +247,10 @@ alias gcm='git commit -m '
 alias gme='git mergetool '
 alias gbr='git branch '
 # Text Editors
-alias c='code .'
+function call_vscode() {
+    code ${1- .}
+}
+alias c="call_vscode"
 alias a='atom .'
 # Grep related
 alias search="grep -R "
@@ -308,7 +317,9 @@ alias kk='ll'
 # Make the following commands run in background automatically:
 #-------------------------------------------------------------
 
-function nautilus() { command nautilus "$@">/dev/null &;}
+function naut() {
+    command nautilus "$@" >/dev/null &
+}
 
 #-------------------------------------------------------------
 # Functions
@@ -397,7 +408,7 @@ function sanitize() { chmod -R u=rwX,g=rX,o= "$@"; }
 function my_ps() { ps $@ -u $USER -o pid,%cpu,%mem,bsdtime,command; }
 function pp() { my_ps f | awk '!/awk/ && $0~var' var=${1:-".*"}; }
 
-function killps() { # kill by process name
+function killps() {             # kill by process name
     local pid pname sig="-TERM" # default signal
     if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
         echo "Usage: killps [-SIGNAL] pattern"
@@ -469,10 +480,6 @@ function ii() { # Get current host related info.
 # Misc utilities:
 #-------------------------------------------------------------
 
-function ke() {
-    kubectl exec -it $1 bash
-    }
-
 function exports() {
     while read LINE; do
         echo "%s\n" "$line"
@@ -507,7 +514,6 @@ function gpu() {
     git config --global credential.helper 'cache --timeout=604800'
     git pull $1 $2 $3 $4 $5 $6
 }
-
 
 function ssu() {
     su $1 $2 $3 $4 $5-c "bash --rcfile /tmp/.bashrc_temp"
@@ -550,3 +556,7 @@ cal -3
 echo -ne "${Cyan}"
 
 source ~/.profile
+
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
