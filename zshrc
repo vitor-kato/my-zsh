@@ -62,7 +62,7 @@ if [ -n "$ZSH_VERSION" ]; then
         zsh-syntax-highlighting
         z
         sudo
-        per-directory-history
+        # per-directory-history
         zsh-autosuggestions
         # pipenv
     )
