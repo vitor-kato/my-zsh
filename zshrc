@@ -63,6 +63,7 @@ if [ -n "$ZSH_VERSION" ]; then
         z
         sudo
         # per-directory-history
+        python
         zsh-autosuggestions
         # pipenv
     )
@@ -204,6 +205,7 @@ alias vubuntu='vagrant init ubuntu/xenial64'
 # Docker alias
 alias dps='docker ps'
 alias dim='docker images'
+alias dvol='docker volume'
 alias dpull='docker pull'
 alias dexec='docker exec -it'
 alias drmid='docker rmi $(docker images -f 'dangling=true' -q)' # Removes all <none> images
@@ -213,11 +215,17 @@ alias ddown='docker-compose down'
 function de() {
     docker exec -it $1 ${2-bash} ${@:3}
 }
+function dce() {
+    docker-compose exec $1 ${2-bash} ${@:3}
+}
+function cup() {
+    eval './start_${1-dev}.sh ${2-up}'
+}
 # Kubernetes alias
 alias kctl='kubectl'
 alias kget='kubectl get'
 alias kapply='kubectl apply -f'
-alias kcreate='kubectl create -f'
+alias kdp='kubectl describe pods'
 # alias klogs='kubectl logs'
 function klogs() {
     kubectl logs $(kubectl get pods | grep ${1} | awk '{print $1;exit}')
@@ -260,7 +268,11 @@ alias not="grep -v"
 alias o='xdg-open '
 # System related
 alias upgrade="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt autoclean"
-alias usb='watch -n 0.1 "dmesg | tail -n $((LINES-6))"'
+if [ /usr/bin/pacman ]; then
+    alias upgrade="sudo pacman -Syu"
+fi
+
+alias usb='sudo watch -n 0.1 "dmesg | tail -n $((LINES-6))"'
 
 if [ /usr/bin/kubectl ]; then source <(kubectl completion zsh); fi
 
