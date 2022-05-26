@@ -219,7 +219,7 @@ function dce() {
     docker-compose exec $1 ${2-bash} ${@:3}
 }
 function cup() {
-    eval './start_${1-dev}.sh ${2-up}'
+    eval './start_${1-dev}.sh ${2-up} ${@:3}'
 }
 # Kubernetes alias
 alias kctl='kubectl'
@@ -231,7 +231,7 @@ function klogs() {
     kubectl logs $(kubectl get pods | grep ${1} | awk '{print $1;exit}')
 }
 function ke() {
-    kubectl exec -it $1 ${2-bash} ${@:3}
+    kubectl exec $1 -- ${2-bash} ${@:3}
 }
 alias k=kubectl
 alias pods='kubectl get pods'
@@ -254,6 +254,10 @@ alias gba='git branch -a'
 alias gcm='git commit -m '
 alias gme='git mergetool '
 alias gbr='git branch '
+
+#Github CLI
+alias gheasy='gh pr create -a @me -f && gh pr merge --merge'
+
 # Text Editors
 function call_vscode() {
     code ${1- .}
@@ -320,6 +324,7 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 #-------------------------------------------------------------
 
 alias xs='cd'
+alias as='cd'
 alias vf='cd'
 alias moer='more'
 alias moew='more'
@@ -336,6 +341,15 @@ function naut() {
 #-------------------------------------------------------------
 # Functions
 #-------------------------------------------------------------
+
+function retry() {
+    RET=1
+    until [ ${RET} -eq 0 ]; do
+        ${*}
+        RET=$?
+        sleep 2
+    done
+}
 
 # Find a file with a pattern in name:
 function ff() { find . -type f -iname '*'"$*"'*' -ls; }
@@ -572,3 +586,9 @@ source ~/.profile
 # tabtab source for packages
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/vitor-kato/google-cloud-sdk/path.zsh.inc' ]; then . '/home/vitor-kato/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/vitor-kato/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/vitor-kato/google-cloud-sdk/completion.zsh.inc'; fi
