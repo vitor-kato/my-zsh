@@ -372,6 +372,25 @@ function mr_gitlab() {
     google-chrome-stable $url
 }
 
+function leroy() {
+
+    env=$1
+    cicd=$2
+
+    sub1="ci"
+    sub2="cd"
+
+    if test "${cicd#*$sub1}" != "$cicd"; then
+        cicd="-ci"
+    else
+        cicd="-cd"
+    fi
+
+    url="http://jenkins.srv-cld.brasilseg.com.br/job/${env}/job/ultron-sinistro-regulacao-middleware-backend${cicd}/"
+
+    google-chrome-stable $url
+}
+
 function swap() { # Swap 2 filenames around, if they exist (from Uzi's bashrc).
     local TMPFILE=tmp.$$
 
