@@ -58,6 +58,7 @@ if [ -n "$ZSH_VERSION" ]; then
     # Example format: plugins=(rails git textmate ruby lighthouse)
     # Add wisely, as too many plugins slow down shell startup.
     plugins=(
+        zsh-lazyload
         git
         zsh-syntax-highlighting
         z
@@ -191,17 +192,6 @@ alias path='echo -e ${PATH//:/\\n}'
 alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
 alias du='du -kh' # Makes a more readable output.
 alias df='df -kTh'
-# Vagrant alias
-alias vs='vagrant ssh'
-alias vu='vagrant up'
-alias vus='vagrant up && vagrant ssh'
-alias vr='vagrant reload'
-alias vh='vagrant halt'
-alias vgs='vagrant global-status'
-alias vport='vagrant port'
-alias vdebian='vagrant init debian/stretch64'
-alias vcentos='vagrant init centos/7'
-alias vubuntu='vagrant init ubuntu/xenial64'
 # Docker alias
 alias dps='docker ps'
 alias dim='docker images'
@@ -212,6 +202,8 @@ alias drmid='docker rmi $(docker images -f 'dangling=true' -q)' # Removes all <n
 alias dcom='docker-compose'
 alias dup='docker-compose up'
 alias ddown='docker-compose down'
+alias ports='lsof -i -P -n | grep LISTEN'
+
 function de() {
     docker exec -it $1 ${2-bash} ${@:3}
 }
@@ -259,7 +251,6 @@ function call_vscode() {
     code ${1- .}
 }
 alias c="call_vscode"
-alias a='atom .'
 # Grep related
 alias search="grep -R "
 alias g="grep"
@@ -269,7 +260,7 @@ alias o='xdg-open '
 # System related
 alias upgrade="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt autoclean"
 if [ /usr/bin/pacman ]; then
-    alias upgrade="sudo pacman -Syu"
+    alias upgrade="sudo pacman -Syyu && yay -Sua"
 fi
 
 alias usb='sudo watch -n 0.1 "dmesg | tail -n $((LINES-6))"'
@@ -368,6 +359,17 @@ function fstr() {
     find . -type f -name "${2:-*}" -print0 |
         xargs -0 egrep --color=always -sn ${case} "$1" 2>&- | more
 
+}
+
+function mr_gitlab() {
+
+    repo_url=$(git remote get-url --all origin | sed 's/\.git//')
+    repo_name=$(basename $repo_url)
+    current_b=$(git rev-parse --abbrev-ref HEAD)
+
+    url="${repo_url}/-/merge_requests/new?merge_request[source_project_name]=${repo_name}&merge_request[source_branch]=${current_b}&merge_request[target_project_id]=${repo_name}&merge_request[target_branch]=$1"
+
+    google-chrome-stable $url
 }
 
 function swap() { # Swap 2 filenames around, if they exist (from Uzi's bashrc).
