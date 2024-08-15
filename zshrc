@@ -58,7 +58,7 @@ if [ -n "$ZSH_VERSION" ]; then
     # Example format: plugins=(rails git textmate ruby lighthouse)
     # Add wisely, as too many plugins slow down shell startup.
     plugins=(
-        zsh-lazyload
+        # zsh-lazyload
         git
         zsh-syntax-highlighting
         z
@@ -67,6 +67,7 @@ if [ -n "$ZSH_VERSION" ]; then
         python
         zsh-autosuggestions
         # pipenv
+        copypath
     )
 
     source $ZSH/oh-my-zsh.sh
@@ -248,7 +249,7 @@ alias gme='git mergetool '
 alias gbr='git branch '
 # Text Editors
 function call_vscode() {
-    code ${1- .}
+    code .
 }
 alias c="call_vscode"
 # Grep related
@@ -259,9 +260,9 @@ alias not="grep -v"
 alias o='xdg-open '
 # System related
 alias upgrade="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt autoclean"
-if [ /usr/bin/pacman ]; then
-    alias upgrade="sudo pacman -Syyu && yay -Sua"
-fi
+# if [ /usr/bin/pacman ]; then
+# alias upgrade="sudo pacman -Syyu && yay -Sua"
+# fi
 
 alias usb='sudo watch -n 0.1 "dmesg | tail -n $((LINES-6))"'
 
@@ -368,25 +369,6 @@ function mr_gitlab() {
     current_b=$(git rev-parse --abbrev-ref HEAD)
 
     url="${repo_url}/-/merge_requests/new?merge_request[source_project_name]=${repo_name}&merge_request[source_branch]=${current_b}&merge_request[target_project_id]=${repo_name}&merge_request[target_branch]=$1"
-
-    google-chrome-stable $url
-}
-
-function leroy() {
-
-    env=$1
-    cicd=$2
-
-    sub1="ci"
-    sub2="cd"
-
-    if test "${cicd#*$sub1}" != "$cicd"; then
-        cicd="-ci"
-    else
-        cicd="-cd"
-    fi
-
-    url="http://jenkins.srv-cld.brasilseg.com.br/job/${env}/job/ultron-sinistro-regulacao-middleware-backend${cicd}/"
 
     google-chrome-stable $url
 }
@@ -552,6 +534,17 @@ function ssu() {
     su $1 $2 $3 $4 $5-c "bash --rcfile /tmp/.bashrc_temp"
 }
 
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
 # WELCOME SCREEN
 ########################################################
 
@@ -589,7 +582,3 @@ cal -3
 echo -ne "${Cyan}"
 
 source ~/.profile
-
-# tabtab source for packages
-# uninstall by removing these lines
-[[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
